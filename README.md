@@ -71,8 +71,19 @@ Machine Learning- Works with Data
 -Supervised: classification task- black color fruit and green color fruit labelling. New fruit what types. For this problem need to be supervised.
 -Supervised two category. One is classification and another one is regression. If output will be continuous number based on some factor, it will be regression. It has dependednt and dependednt.
 -Unsupervised: based on characterstics divide them in cluster.
+-these are discriminative concept
 
 -Summmary: Supervised has labelled and unsupervised not have labeled.
+
+-Generative AI- train model with the large data, train the model such that model can provide the information using the previous information-LLM
+
+**Steps of ML**
+
+1. Problem deifintiion
+2. Data collection
+3. Model selection and particular alogrithm
+4. Model Training
+5. Evaluate the model
 
 
 
