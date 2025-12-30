@@ -35,6 +35,33 @@ Machine Learning- Works with Data
 -Clustering
 -PCA
 
+**Model Tuning**
+-hyper parameter tuning
+-grid search
+-random search
+-genetic algorithm
+-Bayesian optimization
+
+
+
+**Deep Learning**
+-Image processing; Sequence Model;
+-ANN
+-Nueral Network architecture
+-Activation function- LR
+-Loss function-MSE/MASE
+-Optimizers
+-Forward/backpropagation
+-vanishing and exploding gradient
+-overfitting
+
+-Image and computer vision backbone- CNN
+-pretrained model- transfer learning
+
+**Text Data**
+-RNN, GRU, BERT- sequence model
+-text processing
+
 
 
 
