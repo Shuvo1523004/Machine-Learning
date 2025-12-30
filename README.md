@@ -63,5 +63,16 @@ Machine Learning- Works with Data
 -text processing
 
 
+**Deatils of Machine Learning**
+-Train Data (Use algorithm and labelling)
+-We got train model
+-Types: Disciminative model and Generative Model
+-Learning types: Supervised, Unsupervised and reinforcement learning
+-Supervised: classification task- black color fruit and green color fruit labelling. New fruit what types. For this problem need to be supervised.
+-Supervised two category. One is classification and another one is regression. If output will be continuous number based on some factor, it will be regression. It has dependednt and dependednt.
+-Unsupervised: based on characterstics divide them in cluster.
+
+-Summmary: Supervised has labelled and unsupervised not have labeled.
+
 
 
