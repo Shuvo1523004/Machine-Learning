@@ -30,7 +30,7 @@ Machine Learning- Works with Data
 -crosss validation (k-fold, stratified k-fold, time series split)
 -confusion matrix (classification- accuracy, AUC, ROC, F1 score)
 -model evaluation for regression (MSE, MASE, R2)
--
+
 **Unsupervised**
 -Clustering
 -PCA
