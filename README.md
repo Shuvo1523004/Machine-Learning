@@ -83,7 +83,16 @@ Machine Learning- Works with Data
 2. Data collection
 3. Model selection and particular alogrithm
 4. Model Training
-5. Evaluate the model
+5. Evaluate the model- how properly it can give correct ans
+6. Model Fine tuning-enahnce the performance by finding the optimum
+7. Deployment- Which cloud or service
+
+
+**Code Editor**
+
+1. Jupyter notebook
+2. kaggle
+3. 
 
 
 
