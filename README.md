@@ -90,6 +90,9 @@ Machine Learning- Works with Data
 
 **Code Editor**
 
+**Types of Variable**
+
+
 1. Jupyter notebook
 2. kaggle
 3. 
