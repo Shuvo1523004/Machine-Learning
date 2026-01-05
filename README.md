@@ -90,12 +90,27 @@ Machine Learning- Works with Data
 
 **Code Editor**
 
-**Types of Variable**
-
-
 1. Jupyter notebook
 2. kaggle
-3. 
+
+**Types of Variable**
+-data type
+-measurement scale
+-nature
+-distribution
+
+--Based on data
+-numerical
+-categorial
+-binary
+-text
+-daye/time
+
+**Linear Regression**
+
+**library**
+-scikit
+
 
 
 
