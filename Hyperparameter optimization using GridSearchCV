@@ -1,0 +1,223 @@
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split, KFold, GridSearchCV
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
+# -----------------------
+# Load dataset
+# -----------------------
+df = pd.read_excel("Final_Bacteria_New 320.xlsx")
+
+# Target and features
+y = df["Compressive Strength"]
+X = df.drop(columns=["Compressive Strength"])
+
+# -----------------------
+# 70/30 split (paper)
+# -----------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.30,
+    random_state=42,
+    shuffle=True
+)
+
+# -----------------------
+# Scaling (fit on train only)
+# -----------------------
+scaler = MinMaxScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+# -----------------------
+# 5-fold CV (paper)
+# -----------------------
+cv = KFold(n_splits=5, shuffle=True, random_state=42)
+
+def evaluate_test(model, X_te, y_te):
+    """Return R2, RMSE, MAE, MAPE on test set."""
+    pred = model.predict(X_te)
+    r2 = r2_score(y_te, pred)
+    rmse = mean_squared_error(y_te, pred, squared=False)
+    mae = mean_absolute_error(y_te, pred)
+    # avoid division by zero in MAPE (just in case)
+    eps = 1e-9
+    mape = (np.abs((y_te - pred) / (np.abs(y_te) + eps)).mean()) * 100
+    return r2, rmse, mae, mape
+
+###GridSearchCV for RF and GBR (always available in sklearn)
+
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+
+# -----------------------
+# Random Forest
+# -----------------------
+rf = RandomForestRegressor(random_state=42)
+
+rf_grid = {
+    "n_estimators": [200, 400, 600],
+    "max_depth": [None, 10, 20, 30],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4],
+    "max_features": ["sqrt", 0.7]   # works for regression too
+}
+
+rf_search = GridSearchCV(
+    estimator=rf,
+    param_grid=rf_grid,
+    scoring="r2",
+    cv=cv,
+    n_jobs=-1,
+    verbose=1
+)
+
+rf_search.fit(X_train_s, y_train)
+best_rf = rf_search.best_estimator_
+
+# -----------------------
+# Gradient Boosting Regressor
+# -----------------------
+gbr = GradientBoostingRegressor(random_state=42)
+
+gbr_grid = {
+    "n_estimators": [200, 400, 600],
+    "learning_rate": [0.03, 0.05, 0.1],
+    "max_depth": [2, 3, 4],
+    "subsample": [0.8, 1.0],
+    "min_samples_split": [2, 5, 10],
+    "min_samples_leaf": [1, 2, 4]
+}
+
+gbr_search = GridSearchCV(
+    estimator=gbr,
+    param_grid=gbr_grid,
+    scoring="r2",
+    cv=cv,
+    n_jobs=-1,
+    verbose=1
+)
+
+gbr_search.fit(X_train_s, y_train)
+best_gbr = gbr_search.best_estimator_
+
+
+
+##GridSearchCV for XGBoost and LightGBM
+
+
+models = []
+results = []
+
+# helper to store results
+def add_result(name, search_obj, best_model):
+    cv_r2 = search_obj.best_score_
+    r2, rmse, mae, mape = evaluate_test(best_model, X_test_s, y_test)
+    results.append({
+        "Model": name,
+        "Best CV R2 (5-fold)": cv_r2,
+        "Test R2": r2,
+        "Test RMSE": rmse,
+        "Test MAE": mae,
+        "Test MAPE (%)": mape,
+        "Best Params": search_obj.best_params_
+    })
+
+# store RF / GBR results
+add_result("Random Forest", rf_search, best_rf)
+add_result("Gradient Boosting", gbr_search, best_gbr)
+
+# -----------------------
+# XGBoost (optional)
+# -----------------------
+pip install xgboost lightgbm
+
+try:
+    from xgboost import XGBRegressor
+
+    xgb = XGBRegressor(
+        random_state=42,
+        objective="reg:squarederror",
+        n_jobs=-1
+    )
+
+    xgb_grid = {
+        "n_estimators": [400, 800],
+        "max_depth": [3, 5, 7],
+        "learning_rate": [0.03, 0.05, 0.1],
+        "subsample": [0.8, 1.0],
+        "colsample_bytree": [0.8, 1.0],
+        "reg_lambda": [1, 5, 10]
+    }
+
+    xgb_search = GridSearchCV(
+        estimator=xgb,
+        param_grid=xgb_grid,
+        scoring="r2",
+        cv=cv,
+        n_jobs=-1,
+        verbose=1
+    )
+
+    xgb_search.fit(X_train_s, y_train)
+    best_xgb = xgb_search.best_estimator_
+    add_result("XGBoost", xgb_search, best_xgb)
+
+except ImportError:
+    print("xgboost is not installed. Skipping XGBoost GridSearch.")
+
+# -----------------------
+# LightGBM (optional)
+# -----------------------
+try:
+    from lightgbm import LGBMRegressor
+
+    lgb = LGBMRegressor(
+        random_state=42,
+        n_jobs=-1
+    )
+
+    lgb_grid = {
+        "n_estimators": [400, 800],
+        "max_depth": [-1, 5, 10],
+        "learning_rate": [0.03, 0.05, 0.1],
+        "num_leaves": [31, 63, 127],
+        "subsample": [0.8, 1.0],
+        "colsample_bytree": [0.8, 1.0]
+    }
+
+    lgb_search = GridSearchCV(
+        estimator=lgb,
+        param_grid=lgb_grid,
+        scoring="r2",
+        cv=cv,
+        n_jobs=-1,
+        verbose=1
+    )
+
+    lgb_search.fit(X_train_s, y_train)
+    best_lgb = lgb_search.best_estimator_
+    add_result("LightGBM", lgb_search, best_lgb)
+
+except ImportError:
+    print("lightgbm is not installed. Skipping LightGBM GridSearch.")
+
+
+
+##Create a Clean “Best Hyperparameters” Table
+
+
+results_df = pd.DataFrame(results)
+
+# Sort by CV score (paper-style selection)
+results_df = results_df.sort_values(by="Best CV R2 (5-fold)", ascending=False)
+
+# Save results table
+results_df.to_excel("GridSearch_BestModels_Results.xlsx", index=False)
+
+print(results_df[["Model", "Best CV R2 (5-fold)", "Test R2", "Test RMSE", "Test MAE", "Test MAPE (%)"]])
+print("\nFull best-params table saved as: GridSearch_BestModels_Results.xlsx")
+
+
+##End
