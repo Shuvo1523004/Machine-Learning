@@ -1,0 +1,30 @@
+# Pearson correlation matrix
+corr_matrix = df[cols].corr(method="pearson")
+
+# Round values
+corr_matrix = corr_matrix.round(3)
+
+# Save to Excel (optional)
+corr_matrix.to_excel("Correlation_Matrix.xlsx")
+
+print(corr_matrix)
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(9,7))
+
+sns.heatmap(
+    corr_matrix,
+    annot=True,
+    fmt=".2f",
+    cmap="coolwarm",
+    square=True,
+    linewidths=0.5,
+    cbar_kws={"label": "Pearson correlation coefficient"}
+)
+
+plt.title("Correlation matrix of input variables and compressive strength")
+plt.tight_layout()
+plt.savefig("Figure_Correlation_Heatmap.png", dpi=300)
+plt.show()
