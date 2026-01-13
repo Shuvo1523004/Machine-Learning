@@ -1,0 +1,27 @@
+import pandas as pd
+
+# Load cleaned dataset
+df = pd.read_excel("Final_Bacteria_New 320.xlsx")
+
+# Select continuous variables ONLY (no one-hot columns)
+cols = [
+    "Cement_(kg/m³)",
+    "CA_(kg/m³)",
+    "FA_(kg/m³)",
+    "Recycled_Aggregate_Percent_(%)",
+    "Seashell_Ash_Percent_(%)",
+    "Water_Binder_Ratio",
+    "Bacteria_Conc_(CFU/ml)",
+    "Compressive Strength"
+]
+
+# Descriptive statistics
+table1 = df[cols].describe().T
+
+# Round for publication
+table1 = table1.round(3)
+
+# Save to Excel (optional)
+table1.to_excel("Table1_Descriptive_Statistics.xlsx")
+
+print(table1)
