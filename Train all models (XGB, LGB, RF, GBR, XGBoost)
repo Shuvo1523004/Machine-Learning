@@ -1,0 +1,103 @@
+import pandas as pd
+import numpy as np
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
+# Load dataset
+df = pd.read_excel("Final_Bacteria_New 320.xlsx")
+
+# Target and features
+y = df["Compressive Strength"]
+X = df.drop(columns=["Compressive Strength"])
+
+# 70/30 split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.30,
+    random_state=42,
+    shuffle=True
+)
+
+# Min–Max scaling (fit on train only)
+scaler = MinMaxScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+
+
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor
+
+models = {
+    "Random Forest": RandomForestRegressor(
+        n_estimators=400,
+        max_depth=20,
+        min_samples_split=2,
+        min_samples_leaf=1,
+        random_state=42
+    ),
+
+    "Gradient Boosting": GradientBoostingRegressor(
+        n_estimators=400,
+        learning_rate=0.05,
+        max_depth=3,
+        subsample=0.9,
+        random_state=42
+    ),
+
+    "XGBoost": XGBRegressor(
+        n_estimators=800,
+        learning_rate=0.05,
+        max_depth=5,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        objective="reg:squarederror",
+        random_state=42,
+        n_jobs=-1
+    ),
+
+    "LightGBM": LGBMRegressor(
+        n_estimators=800,
+        learning_rate=0.05,
+        max_depth=-1,
+        num_leaves=63,
+        subsample=0.9,
+        colsample_bytree=0.9,
+        random_state=42
+    )
+}
+
+
+##train+test model
+
+results = []
+
+for name, model in models.items():
+    # Train model
+    model.fit(X_train_s, y_train)
+
+    # Predict on test set
+    y_pred = model.predict(X_test_s)
+
+    # Metrics
+    r2 = r2_score(y_test, y_pred)
+    rmse = mean_squared_error(y_test, y_pred, squared=False)
+    mae = mean_absolute_error(y_test, y_pred)
+    mape = np.mean(np.abs((y_test - y_pred) / (y_test + 1e-9))) * 100
+
+    results.append({
+        "Model": name,
+        "R2": r2,
+        "RMSE": rmse,
+        "MAE": mae,
+        "MAPE (%)": mape
+    })
+
+# Results table
+results_df = pd.DataFrame(results).sort_values(by="R2", ascending=False)
+print(results_df)
+
+# Save for paper
+results_df.to_excel("Model_Performance_TestSet.xlsx", index=False)
